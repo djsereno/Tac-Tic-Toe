@@ -7,6 +7,7 @@ class Settings():
         self.screenWidth = 800
         self.screenHeight = 800
         self.bgColor = (230, 230, 230)
-        self.lineColor = (0, 0, 255)
-        self.xoColor = (0, 0, 255)
+        self.lineColor = (0, 0, 0)
+        self.xColor = (0, 0, 255)
+        self.oColor = (255, 0, 0)
         self.winLineColor = (0, 255, 0)

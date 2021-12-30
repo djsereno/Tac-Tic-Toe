@@ -46,7 +46,11 @@ class Board():
                 if player != 0:
                     x = int((col + 0.5) * spacing)
                     y = int((row + 0.5) * spacing)
-                    text = font.render(player, True, settings.xoColor)
+
+                    if player == "X":
+                        text = font.render(player, True, settings.xColor)
+                    else:
+                        text = font.render(player, True, settings.oColor)
                     textRect = text.get_rect()
                     textRect.center = (x, y)
                     screen.blit(text, textRect)

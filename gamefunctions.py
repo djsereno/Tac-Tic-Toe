@@ -2,28 +2,26 @@ import sys
 import pygame
 from time import sleep
 
-def check_events(screen, board):
+def checkEvents(settings, screen, stats, sb, board, playButton):
     """Respond to keypresses and mouse events"""
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             sys.exit()
         elif event.type == pygame.KEYDOWN:
-            check_keydown_events(event)
-        elif event.type == pygame.KEYUP:
-            check_keyup_events(event)
+            checkKeydownEvents(event)
         elif event.type == pygame.MOUSEBUTTONDOWN:
-            row, col = getGridPosition(screen, board)
-            board.pickSpot(row, col)
+            # If game is not over, pick the spot that the user has chosen
+            if not board.gameOver:
+                row, col = getGridPosition(screen, board)
+                board.pickSpot(settings, stats, sb, row, col)
+            else:
+                mouseX, mouseY = pygame.mouse.get_pos()
+                checkPlayButton(settings, stats, sb, playButton, board, mouseX, mouseY)
 
-def check_keydown_events(event):
+def checkKeydownEvents(event):
     """Respond to keypresses"""
     if event.key == pygame.K_q:
         sys.exit()
-
-def check_keyup_events(event):
-    """Respond to key releases"""
-    if event.key == pygame.K_RIGHT:
-        print("hi")
 
 def getGridPosition(screen, board):
     """Returns the grid position of the cursor"""
@@ -34,7 +32,19 @@ def getGridPosition(screen, board):
     col = int(x / spacing)
     return row, col
 
-def update_screen(settings, screen, stats, board):
+def checkPlayButton(settings, stats, sb, playButton, board, mouseX, mouseY):
+    """Start a new game when the player clicks Play"""
+    buttonClicked = playButton.rect.collidepoint(mouseX, mouseY)
+    if buttonClicked and not stats.gameActive:
+        # Reset the game statistics
+        stats.gameActive = True
+
+        # Reset the game board and scoreboard status message
+        board.reset()
+        sb.statusMsgColor = settings.xColor
+        sb.prepScore("X's Turn")
+
+def updateScreen(settings, screen, stats, sb, board, playButton):
     """Update images on the screen and flip to the new screen"""
     # Redraw the screen
     screen.fill(settings.bgColor)
@@ -42,12 +52,12 @@ def update_screen(settings, screen, stats, board):
     # Draw the game board
     board.draw(screen, settings, stats)
 
-    # # draw the score information
-    # sb.show_score()
+    # draw the score information
+    sb.showScore()
     
-    # # Draw the play button if the game is inactive
-    # if not stats.game_active:
-    #     play_button.draw_button()
+    # Draw the play button if the game is inactive
+    if not stats.gameActive:
+        playButton.drawButton()
     
     # Make the most recently drawn screen visible
     pygame.display.flip()

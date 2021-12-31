@@ -10,8 +10,7 @@ class Board():
         self.currentTurn = "X"
         self.width = width
         self.gridSpacing = int(width / 3)
-        self.winLineStart = [0, 0]
-        self.winLineEnd = [0, 0]
+        self.winLine = [[0, 0], [0, 0]]
         self.gameOver = False
 
     def print(self):
@@ -20,12 +19,14 @@ class Board():
         for r in range(self.size):
             print(self.grid[r])
 
-    def changeTurn(self):
+    def changeTurn(self, settings, sb):
         """Changes the current turn to the next player"""
         if self.currentTurn == "X":
             self.currentTurn = "O"
+            sb.statusMsgColor = settings.oColor
         else:
             self.currentTurn = "X"
+            sb.statusMsgColor = settings.xColor
 
     def draw(self, screen, settings, stats):
         """Draws the gameboard to the canvas"""
@@ -57,19 +58,46 @@ class Board():
 
         # Draw the win line if the game is over
         if self.gameOver:
-            pygame.draw.line(screen, settings.winLineColor, self.winLineStart, self.winLineEnd, 20)
+            pygame.draw.line(screen, settings.winLineColor, self.winLine[0], self.winLine[1], 20)
             stats.gameActive = False
 
-    def pickSpot(self, row, col):
+    def pickSpot(self, settings, stats, sb, row, col):
         """Takes a spot if available and changes turn"""
+        # Only take the spot if it is available
         if self.grid[row][col] == 0:
             self.grid[row][col] = self.currentTurn
-            if self.checkGameOver() == 0:
-                self.changeTurn()            
+            
+            # Check if the last move has ended the game. Change turn if not.
+            gameOver = self.checkGameOver()
+            if gameOver == 0:
+                # Game is still active. Change turn and update scoreboard status message.
+                self.changeTurn(settings, sb)
+                statusMsg = self.currentTurn + "'s Turn"
+                sb.prepScore(statusMsg)
+            else:
+                # Game is over. Update scores and scoreboard.
+                self.gameOver = True 
+                if gameOver == 1 and self.currentTurn == "X":
+                    stats.xScore += 1
+                    sb.prepScore("X Wins!")
+                elif gameOver == 1 and self.currentTurn == "O":
+                    stats.oScore += 1
+                    sb.prepScore("O Wins!")
+                else:
+                    sb.statusMsgColor = settings.lineColor
+                    sb.prepScore("Tie Game!")
 
+    def reset(self):
+        """Resets the game board"""
+        size = self.size
+        self.grid = [[0 for i in range(size)] for j in range(size)]
+        self.currentTurn = "X"
+        self.winLine = [[0, 0], [0, 0]]
+        self.gameOver = False
+    
     def checkGameOver(self):
         """Checks if the game is over and returns True if so"""
-        # Returns 1 if game is a win,along with coordinates for win line 
+        # Returns 1 if game is a win 
         # Returns 0 if game is still active
         # Returns -1 if game is a tie
 
@@ -87,9 +115,8 @@ class Board():
                     y1 = int(spacing * (row + 0.5))
                     x2 = int(spacing * (size - 0.25))
                     y2 = y1
-                    self.winLineStart = [x1, y1]
-                    self.winLineEnd = [x2, y2]
-                    self.gameOver = True
+                    self.winLine[0] = [x1, y1]
+                    self.winLine[1] = [x2, y2]
                     return 1
 
         # Check for a vertical win
@@ -104,9 +131,8 @@ class Board():
                     y1 = int(0.25 * spacing)
                     x2 = x1
                     y2 = int(spacing * (size - 0.25))
-                    self.winLineStart = [x1, y1]
-                    self.winLineEnd = [x2, y2]
-                    self.gameOver = True
+                    self.winLine[0] = [x1, y1]
+                    self.winLine[1] = [x2, y2]
                     return 1
 
         # Check for a diagonal down win
@@ -120,9 +146,8 @@ class Board():
                 y1 = x1
                 x2 = int(spacing * (size - 0.25))
                 y2 = x2
-                self.winLineStart = [x1, y1]
-                self.winLineEnd = [x2, y2]
-                self.gameOver = True
+                self.winLine[0] = [x1, y1]
+                self.winLine[1] = [x2, y2]
                 return 1
 
         # Check for a diagonal up win
@@ -136,9 +161,8 @@ class Board():
                 x2 = int(spacing * (size - 0.25))
                 y1 = x2
                 y2 = x1
-                self.winLineStart = [x1, y1]
-                self.winLineEnd = [x2, y2]
-                self.gameOver = True
+                self.winLine[0] = [x1, y1]
+                self.winLine[1] = [x2, y2]
                 return 1
 
         # Check for a tie
@@ -149,8 +173,6 @@ class Board():
                     return 0
                 # Tie game
                 elif row == size - 1 and col == size - 1:
-                    print("tie")
-                    self.gameOver = True
                     return -1
 
 

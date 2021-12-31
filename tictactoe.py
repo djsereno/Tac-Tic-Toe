@@ -21,11 +21,18 @@ def runGame():
     board = Board(width, 3)
 
     # Create the 'Play' button
-    playButton = Button(screen, settings, "Play Again?")
+    x = screen.get_rect().centerx
+    y = screen.get_rect().centery - 40
+    playButton = Button(screen, settings, "Play Again?", [x, y])
+
+    # Create the 'Reset' button
+    x = screen.get_rect().centerx
+    y = screen.get_rect().centery + 40
+    resetButton = Button(screen, settings, "Reset Scores?", [x, y])
 
     # Start the main loop for the game
     while True:
-        gf.checkEvents(settings, screen, stats, sb, board, playButton)
-        gf.updateScreen(settings, screen, stats, sb, board, playButton)
+        gf.checkEvents(settings, screen, stats, sb, board, playButton, resetButton)
+        gf.updateScreen(settings, screen, stats, sb, board, playButton, resetButton)
 
 runGame()

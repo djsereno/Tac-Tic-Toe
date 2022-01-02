@@ -1,4 +1,5 @@
 import pygame
+import random
 
 class Board():
     """A class to for the Tic Tac Toe board"""
@@ -10,8 +11,9 @@ class Board():
         self.currentTurn = "X"
         self.width = width
         self.gridSpacing = int(width / 3)
-        self.winLine = [[0, 0], [0, 0]]
+        self.winLine = None
         self.gameOver = False
+        self.availableSpaces = self.getAvailableSpaces()
 
     def print(self):
         """Prints a text version of the board"""
@@ -27,6 +29,22 @@ class Board():
         else:
             self.currentTurn = "X"
             sb.statusMsgColor = settings.xColor
+
+    def getAvailableSpaces(self):
+        """Returns a list of available spaces"""
+        spaces = []
+        size = self.size
+        grid = self.grid
+        for row in range(size):
+            for col in range(size):
+                if grid[row][col] == 0:
+                    spaces.append([row, col])
+        return spaces
+
+    def getRandomMove(self):
+        """Returns a random available move"""
+        availableSpaces = self.availableSpaces
+        return availableSpaces[random.randint(0, len(availableSpaces) - 1)]
 
     def draw(self, screen, settings, stats):
         """Draws the gameboard to the canvas"""
@@ -58,14 +76,16 @@ class Board():
 
         # Draw the win line if the game is over
         if self.gameOver:
-            pygame.draw.line(screen, settings.winLineColor, self.winLine[0], self.winLine[1], 20)
             stats.gameActive = False
-
+            if self.winLine:
+                pygame.draw.line(screen, settings.winLineColor, self.winLine[0], self.winLine[1], 20)
+            
     def pickSpot(self, settings, stats, sb, row, col):
         """Takes a spot if available and changes turn"""
         # Only take the spot if it is available
         if self.grid[row][col] == 0:
             self.grid[row][col] = self.currentTurn
+            self.availableSpaces.remove([row, col])
             
             # Check if the last move has ended the game. Change turn if not.
             gameOver = self.checkGameOver()
@@ -91,8 +111,9 @@ class Board():
         """Resets the game board"""
         size = self.size
         self.grid = [[0 for i in range(size)] for j in range(size)]
+        self.availableSpaces = self.getAvailableSpaces()
         self.currentTurn = "X"
-        self.winLine = [[0, 0], [0, 0]]
+        self.winLine = None
         self.gameOver = False
     
     def checkGameOver(self):
@@ -115,8 +136,7 @@ class Board():
                     y1 = int(spacing * (row + 0.5))
                     x2 = int(spacing * (size - 0.25))
                     y2 = y1
-                    self.winLine[0] = [x1, y1]
-                    self.winLine[1] = [x2, y2]
+                    self.winLine = [[x1, y1], [x2, y2]]
                     return 1
 
         # Check for a vertical win
@@ -131,8 +151,7 @@ class Board():
                     y1 = int(0.25 * spacing)
                     x2 = x1
                     y2 = int(spacing * (size - 0.25))
-                    self.winLine[0] = [x1, y1]
-                    self.winLine[1] = [x2, y2]
+                    self.winLine = [[x1, y1], [x2, y2]]
                     return 1
 
         # Check for a diagonal down win
@@ -146,8 +165,7 @@ class Board():
                 y1 = x1
                 x2 = int(spacing * (size - 0.25))
                 y2 = x2
-                self.winLine[0] = [x1, y1]
-                self.winLine[1] = [x2, y2]
+                self.winLine = [[x1, y1], [x2, y2]]
                 return 1
 
         # Check for a diagonal up win
@@ -161,8 +179,7 @@ class Board():
                 x2 = int(spacing * (size - 0.25))
                 y1 = x2
                 y2 = x1
-                self.winLine[0] = [x1, y1]
-                self.winLine[1] = [x2, y2]
+                self.winLine = [[x1, y1], [x2, y2]]
                 return 1
 
         # Check for a tie

@@ -1,4 +1,4 @@
 # Tac-Tic-Toe
  A simple Tic Tac Toe game. 
  
- This version of the game operates by simply clicking the squares on the game board, relying on user input for both players.
+ This version of the game uses a Monte Carlo simulation for the AI opponent.

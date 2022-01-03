@@ -1,6 +1,7 @@
 import pygame
+import time
 import gamefunctions as gf
-from montecarlo import monteCarlo
+import montecarlo as monte
 from settings import Settings
 from board import Board
 from game_stats import GameStats
@@ -38,7 +39,7 @@ def runGame():
 
         # For now, have the computer (O player) randomly make a move
         if stats.gameActive and board.currentTurn == "O":
-            [row, col] = monteCarlo(board, 10)
+            row, col = monte.monteCarlo(board, 100, screen)
             board.pickSpot(settings, stats, sb, row, col)
-
+            
 runGame()

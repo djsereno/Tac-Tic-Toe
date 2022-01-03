@@ -8,12 +8,23 @@ class Board():
         """Initialize the game's static settings"""
         self.size = size
         self.grid = [[0 for i in range(size)] for j in range(size)]
+        self.availableSpaces = self.getAvailableSpaces()
         self.currentTurn = "X"
         self.width = width
         self.gridSpacing = int(width / 3)
         self.winLine = None
         self.gameOver = False
+        self.winner = None
+
+    def reset(self):
+        """Resets the game board"""
+        size = self.size
+        self.grid = [[0 for i in range(size)] for j in range(size)]
         self.availableSpaces = self.getAvailableSpaces()
+        self.currentTurn = "X"
+        self.winLine = None
+        self.gameOver = False
+        self.winner = None
 
     def print(self):
         """Prints a text version of the board"""
@@ -98,23 +109,16 @@ class Board():
                 # Game is over. Update scores and scoreboard.
                 self.gameOver = True 
                 if gameOver == 1 and self.currentTurn == "X":
+                    self.winner = "X"
                     stats.xScore += 1
                     sb.prepScore("X Wins!")
                 elif gameOver == 1 and self.currentTurn == "O":
+                    self.winner = "O"
                     stats.oScore += 1
                     sb.prepScore("O Wins!")
                 else:
                     sb.statusMsgColor = settings.lineColor
                     sb.prepScore("Tie Game!")
-
-    def reset(self):
-        """Resets the game board"""
-        size = self.size
-        self.grid = [[0 for i in range(size)] for j in range(size)]
-        self.availableSpaces = self.getAvailableSpaces()
-        self.currentTurn = "X"
-        self.winLine = None
-        self.gameOver = False
     
     def checkGameOver(self):
         """Checks if the game is over and returns True if so"""
